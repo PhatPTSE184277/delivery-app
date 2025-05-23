@@ -1,2 +1,4 @@
-import SpashScreen from './SplashScreen';
-export { SplashScreen };
+import SplashScreen from './SplashScreen';
+import WelcomeScreen from './WelcomeScreen';
+
+export { SplashScreen, WelcomeScreen };
