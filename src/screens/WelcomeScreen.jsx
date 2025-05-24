@@ -7,8 +7,8 @@ import {
     TouchableOpacity
 } from 'react-native';
 import React, { useState } from 'react';
-import { Colors, Fonts } from '../constants';
-import General from '../constants/General';
+import { Colors, Fonts } from '../contants';
+import General from '../contants/General';
 import WelcomeCard from '../components/WelcomeCard';
 import { Display } from '../utils';
 import { Separator } from '../components';
@@ -33,7 +33,7 @@ const Pagination = ({ index }) => {
     );
 };
 
-const WelcomeScreen = () => {
+const WelcomeScreen = ({navigation}) => {
     const [welcomeListIndex, setWelcomeListIndex] = useState(0);
     const welcomeList = useRef();
     const onViewRef = useRef(({ changed }) => {
@@ -76,7 +76,7 @@ const WelcomeScreen = () => {
             <Separator height={Display.setHeight(8)} />
             {welcomeListIndex === 2 ? (
                 <TouchableOpacity style={styles.gettingStartedButton} activeOpacity={0.8}>
-                    <Text style={styles.gettingStartedButtonText}>
+                    <Text style={styles.gettingStartedButtonText} onPress={() => navigation.navigate('Signin')}>
                         Get Started
                     </Text>
                 </TouchableOpacity>

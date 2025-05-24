@@ -3,7 +3,7 @@ import { View, ActivityIndicator } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useFonts } from 'expo-font';
 import Navigators from './src/navigators/index';
-import Colors from './src/constants/Colors';
+import Colors from './src/contants/Colors';
 
 export default function App() {
   const [fontsLoaded] = useFonts({
