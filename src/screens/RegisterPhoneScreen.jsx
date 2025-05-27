@@ -7,7 +7,7 @@ import {
     TextInput,
     View
 } from 'react-native';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Colors, CountryCode, Fonts, Images } from '../contants';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -25,6 +25,7 @@ const RegisterPhoneScreen = ({ navigation }) => {
     const [inputContainerY, setInputContainerY] = useState(0);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [dropdownLayout, setDropdownLayout] = useState({});
+    const [phoneNumber, setPhoneNumber] = useState('');
 
     const closeDropdown = (pageX, pageY) => {
         if (isDropdownOpen) {
@@ -96,6 +97,7 @@ const RegisterPhoneScreen = ({ navigation }) => {
                         selectionColor={Colors.DEFAULT_GREY}
                         keyboardType='number-pad'
                         style={styles.inputText}
+                        onChangeText={(text) => setPhoneNumber(selectedCountry?.dial_code + text)}
                     />
                 </View>
             </View>
@@ -103,7 +105,7 @@ const RegisterPhoneScreen = ({ navigation }) => {
                 style={styles.signinButton}
                 activeOpacity={0.8}
                 onPress={() =>
-                    navigation.navigate('Verification', { phoneNumber })
+                    navigation.navigate('Verification', {phoneNumber})
                 }
             >
                 <Text style={styles.signinButtonText}>Continue</Text>

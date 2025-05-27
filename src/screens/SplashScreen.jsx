@@ -2,15 +2,8 @@ import { Image, StatusBar, StyleSheet, Text, View } from 'react-native';
 import Colors from '../contants/Colors';
 import { Fonts, Images } from '../contants';
 import { Display } from '../utils';
-import { useEffect } from 'react';
 
-const SplashScreen = ({navigation}) => {
-    useEffect(() => {
-        setTimeout(() => {
-            navigation.navigate('Welcome');
-        }, 1500)
-    }, []);
-
+const SplashScreen = () => {
     return (
         <View style={styles.container}>
             <StatusBar barStyle='light-content' backgroundColor={Colors.DEFAULT_GREEN}/>

@@ -4,6 +4,8 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useFonts } from 'expo-font';
 import Navigators from './src/navigators/index';
 import Colors from './src/contants/Colors';
+import { Store } from './src/Store';
+import {Provider} from 'react-redux';
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -28,7 +30,9 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <Navigators />
+      <Provider store={Store}>
+        <Navigators />
+      </Provider>
     </SafeAreaProvider>
   );
 }

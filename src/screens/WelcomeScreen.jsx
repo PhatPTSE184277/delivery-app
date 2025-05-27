@@ -13,6 +13,9 @@ import WelcomeCard from '../components/WelcomeCard';
 import { Display } from '../utils';
 import { Separator } from '../components';
 import { useRef } from 'react';
+import { StorageService } from '../services';
+import { useDispatch } from 'react-redux';
+import GeneralAction from '../actions/GeneralAction';
 
 const pageStyle = (isActive) =>
     isActive
@@ -48,6 +51,14 @@ const WelcomeScreen = ({navigation}) => {
         });
     };
 
+    const dispatch = useDispatch();
+
+    const navigate = () => {
+        StorageService.getFirstTimeUse().then(() => {
+            dispatch(GeneralAction.setIsFirstTimeUse());
+        })
+    }
+
     return (
         <View style={styles.container}>
             <StatusBar
@@ -76,7 +87,7 @@ const WelcomeScreen = ({navigation}) => {
             <Separator height={Display.setHeight(8)} />
             {welcomeListIndex === 2 ? (
                 <TouchableOpacity style={styles.gettingStartedButton} activeOpacity={0.8}>
-                    <Text style={styles.gettingStartedButtonText} onPress={() => navigation.navigate('Signin')}>
+                    <Text style={styles.gettingStartedButtonText} onPress={() => navigate()}>
                         Get Started
                     </Text>
                 </TouchableOpacity>

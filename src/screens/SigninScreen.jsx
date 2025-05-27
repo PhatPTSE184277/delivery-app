@@ -4,7 +4,8 @@ import {
     StyleSheet,
     Text,
     TextInput,
-    View
+    View,
+    Alert
 } from 'react-native';
 import { useState } from 'react';
 import { Separator, ToggleButton } from '../components';
@@ -13,9 +14,41 @@ import Feather from 'react-native-vector-icons/Feather';
 import { TouchableOpacity } from 'react-native';
 import { Colors, Fonts, Images } from '../contants';
 import { Display } from '../utils';
+import { GeneralAction } from '../actions';
+import axiosClient from '../apis/axiosClient';
+import LottieView from 'lottie-react-native';
+import { useDispatch, useSelector } from 'react-redux';
+import { StorageService } from '../services';
 
 const SignInScreen = ({ navigation }) => {
     const [isPasswordShow, setIsPasswordShow] = useState(false);
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const dispatch = useDispatch();
+
+    const handleLogin = async () => {
+        let user = {
+            username,
+            password
+        };
+        try {
+            setIsLoading(true);
+            const response = await axiosClient.post('auth/login', user);
+            if (response && response.data) {
+                StorageService.setToken(response.data.token);
+                dispatch(GeneralAction.setToken(response.data.token))
+                Alert.alert('Login Successful', response.message);
+            }
+        } catch (error) {
+            Alert.alert(
+                'Login Failed',
+                error?.message || 'Something went wrong'
+            );
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
         <View style={styles.container}>
@@ -50,6 +83,7 @@ const SignInScreen = ({ navigation }) => {
                         placeholderTextColor={Colors.DEFAULT_GREY}
                         selectionColor={Colors.DEFAULT_GREY}
                         style={styles.inputText}
+                        onChangeText={(text) => setUsername(text)}
                     />
                 </View>
             </View>
@@ -68,6 +102,7 @@ const SignInScreen = ({ navigation }) => {
                         placeholderTextColor={Colors.DEFAULT_GREY}
                         selectionColor={Colors.DEFAULT_GREY}
                         style={styles.inputText}
+                        onChangeText={(text) => setPassword(text)}
                     />
                     <Feather
                         name={isPasswordShow ? 'eye-off' : 'eye'}
@@ -81,17 +116,40 @@ const SignInScreen = ({ navigation }) => {
             <Text></Text>
             <View style={styles.forgotPasswordContainer}>
                 <View style={styles.toggleContainer}>
-                    <ToggleButton size={0.5}/>
+                    <ToggleButton size={0.5} />
                     <Text style={styles.rememberMeText}>Remember me</Text>
                 </View>
-                <Text style={styles.forgotPasswordText}  onPress={() => navigation.navigate('ForgotPassword')}>Forgot Password</Text>
+                <Text
+                    style={styles.forgotPasswordText}
+                    onPress={() => navigation.navigate('ForgotPassword')}
+                >
+                    Forgot Password
+                </Text>
             </View>
-            <TouchableOpacity style={styles.signinButton}>
-                <Text style={styles.signinButtonText}>Sign In</Text>
+            <TouchableOpacity
+                style={[styles.signinButton, isLoading && { opacity: 0.7 }]}
+                onPress={() => handleLogin()}
+                disabled={isLoading}
+            >
+                {isLoading ? (
+                    <LottieView
+                        source={Images.LOADING}
+                        autoPlay
+                        loop
+                        style={{ width: 50, height: 50 }}
+                    />
+                ) : (
+                    <Text style={styles.signinButtonText}>Create Account</Text>
+                )}
             </TouchableOpacity>
             <View style={styles.signupContainer}>
                 <Text style={styles.accountText}>Don't have an account?</Text>
-                <Text style={styles.signupText} onPress={() => navigation.navigate('Signup')}>Sign Up</Text>
+                <Text
+                    style={styles.signupText}
+                    onPress={() => navigation.navigate('Signup')}
+                >
+                    Sign Up
+                </Text>
             </View>
             <Text style={styles.orText}>OR</Text>
             <TouchableOpacity style={styles.facebookButton}>

@@ -1,4 +1,12 @@
-import { Image, StatusBar, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+    Image,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TextInput,
+    View,
+    Alert
+} from 'react-native';
 import React, { useState } from 'react';
 import { Colors, Fonts, Images } from '../contants';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -6,9 +14,38 @@ import Feather from 'react-native-vector-icons/Feather';
 import { Display } from '../utils';
 import { Separator } from '../components';
 import { TouchableOpacity } from 'react-native';
+import axiosClient from '../apis/axiosClient';
+import LottieView from 'lottie-react-native';
 
 const SignupScreen = ({ navigation }) => {
     const [isPasswordShow, setIsPasswordShow] = useState(false);
+    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleRegister = async () => {
+        let user = {
+            username,
+            email,
+            password
+        };
+        try {
+            setIsLoading(true);
+            const response = await axiosClient.post('auth/register', user);
+            if (response && response.data) {
+                Alert.alert('Registration Successful', response.message);
+                navigation.navigate('Signin');
+            }
+        } catch (error) {
+            Alert.alert(
+                'Registration Failed',
+                error?.message || 'Something went wrong'
+            );
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
         <View style={styles.container}>
@@ -43,6 +80,7 @@ const SignupScreen = ({ navigation }) => {
                         placeholderTextColor={Colors.DEFAULT_GREY}
                         selectionColor={Colors.DEFAULT_GREY}
                         style={styles.inputText}
+                        onChangeText={(text) => setUsername(text)}
                     />
                 </View>
             </View>
@@ -60,6 +98,9 @@ const SignupScreen = ({ navigation }) => {
                         placeholderTextColor={Colors.DEFAULT_GREY}
                         selectionColor={Colors.DEFAULT_GREY}
                         style={styles.inputText}
+                        onChangeText={(text) => setEmail(text)}
+                        keyboardType='email-address'
+                        autoCapitalize='none'
                     />
                 </View>
             </View>
@@ -78,6 +119,7 @@ const SignupScreen = ({ navigation }) => {
                         placeholderTextColor={Colors.DEFAULT_GREY}
                         selectionColor={Colors.DEFAULT_GREY}
                         style={styles.inputText}
+                        onChangeText={(text) => setPassword(text)}
                     />
                     <Feather
                         name={isPasswordShow ? 'eye-off' : 'eye'}
@@ -88,8 +130,21 @@ const SignupScreen = ({ navigation }) => {
                     />
                 </View>
             </View>
-            <TouchableOpacity style={styles.signinButton} onPress={() => navigation.navigate('RegisterPhone')}>
-                <Text style={styles.signinButtonText}>Create Account</Text>
+            <TouchableOpacity
+                style={[styles.signinButton, isLoading && { opacity: 0.7 }]}
+                onPress={() => handleRegister()}
+                disabled={isLoading}
+            >
+                {isLoading ? (
+                    <LottieView
+                        source={Images.LOADING}
+                        autoPlay
+                        loop
+                        style={{ width: 50, height: 50 }}
+                    />
+                ) : (
+                    <Text style={styles.signinButtonText}>Create Account</Text>
+                )}
             </TouchableOpacity>
             <Text style={styles.orText}>OR</Text>
             <TouchableOpacity style={styles.facebookButton}>
@@ -245,5 +300,5 @@ const styles = StyleSheet.create({
     toggleContainer: {
         flexDirection: 'row',
         alignItems: 'center'
-    },
+    }
 });
