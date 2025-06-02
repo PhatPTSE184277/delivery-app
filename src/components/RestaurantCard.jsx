@@ -4,10 +4,88 @@ import { Colors, Fonts } from '../contants';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { StaticImageService } from '../services';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+    addBookmark,
+    removeBookmark,
+    addBookmarkAsync,
+    removeBookmarkAsync,
+    isBookmarkedSelector
+} from '../reduxs/reducers/bookmarkReducer';
 
-const RestaurantCard = ({ id, name, images: { poster }, tags, distance, time, navigate }) => {
+const RestaurantCard = ({
+    id,
+    name,
+    images: { poster },
+    tags,
+    distance,
+    time,
+    navigate
+}) => {
+    const dispatch = useDispatch();
+
+    // Get bookmark status from Redux
+    const isBookmarked = useSelector((state) =>
+        isBookmarkedSelector(state, id)
+    );
+
+    // Get current user
+    const currentUser = useSelector((state) => state.authReducer.data);
+
+    // Handle bookmark toggle
+    const handleBookmarkToggle = () => {
+        if (!currentUser?.username) {
+            console.log('User not logged in');
+            return;
+        }
+
+        if (isBookmarked) {
+            // Remove bookmark
+            dispatch(removeBookmark({ id }));
+            dispatch(
+                removeBookmarkAsync({
+                    restaurantId: id,
+                    username: currentUser.username
+                })
+            );
+        } else {
+            // Add bookmark
+            const bookmarkData = {
+                id,
+                name,
+                image: poster,
+                description: '',
+                rating: 4.0,
+                address: distance
+            };
+
+            dispatch(addBookmark(bookmarkData));
+            dispatch(
+                addBookmarkAsync({
+                    restaurantId: id,
+                    username: currentUser.username
+                })
+            );
+        }
+    };
+
     return (
-        <TouchableOpacity style={styles.container} activeOpacity={0.8} onPress={() => navigate(id)}>
+        <TouchableOpacity
+            style={styles.container}
+            activeOpacity={0.8}
+            onPress={() => navigate(id)}
+        >
+            <TouchableOpacity onPress={handleBookmarkToggle} style={styles.bookmark}>
+                <Ionicons
+                    name={isBookmarked ? 'bookmark' : 'bookmark-outline'}
+                    color={
+                        isBookmarked
+                            ? Colors.DEFAULT_YELLOW
+                            : Colors.DEFAULT_GREY
+                    }
+                    size={24}
+                />
+            </TouchableOpacity>
             <Image
                 source={{ uri: StaticImageService.getPoster(poster) }}
                 style={styles.posterStyle}
@@ -121,6 +199,12 @@ const styles = StyleSheet.create({
         lineHeight: 10 * 1.4,
         fontFamily: Fonts.POPPINS_BOLD,
         color: Colors.DEFAULT_BLACK
+    },
+    bookmark: {
+        position: 'absolute',
+        top: 10,
+        right: 10,
+        zIndex: 10
     }
 });
 

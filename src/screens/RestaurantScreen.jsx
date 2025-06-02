@@ -23,6 +23,13 @@ import {
 } from '../components';
 import { useDispatch, useSelector } from 'react-redux';
 import { TouchableOpacity } from 'react-native';
+import {
+    addBookmark,
+    removeBookmark,
+    addBookmarkAsync,
+    removeBookmarkAsync,
+    isBookmarkedSelector
+} from '../reduxs/reducers/bookmarkReducer';
 
 const ListHeader = () => (
     <View
@@ -72,9 +79,52 @@ const RestaurantScreen = ({
     const [restaurant, setRestaurant] = useState();
     const [loading, setLoading] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState();
-    const [isBookmarked, setIsBookmarked] = useState(false);
+    // const [isBookmarked, setIsBookmarked] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
     const dispatch = useDispatch();
+
+    const isBookmarked = useSelector((state) =>
+        isBookmarkedSelector(state, restaurantId)
+    );
+
+    const currentUser = useSelector((state) => state.authReducer.data);
+
+    // Handle bookmark toggle
+    const handleBookmarkToggle = () => {
+        if (!currentUser?.username) {
+            console.log('User not logged in');
+            return;
+        }
+
+        if (isBookmarked) {
+            // Remove bookmark
+            dispatch(removeBookmark({ id: restaurantId }));
+            dispatch(
+                removeBookmarkAsync({
+                    restaurantId,
+                    username: currentUser.username
+                })
+            );
+        } else {
+            // Add bookmark
+            const bookmarkData = {
+                id: restaurantId,
+                name: restaurant?.name,
+                image: restaurant?.images?.cover,
+                description: restaurant?.description || '',
+                rating: restaurant?.rating || 4.2,
+                address: restaurant?.distance
+            };
+
+            dispatch(addBookmark(bookmarkData));
+            dispatch(
+                addBookmarkAsync({
+                    restaurantId,
+                    username: currentUser.username
+                })
+            );
+        }
+    };
 
     const getRestaurant = async () => {
         setLoading(true);
@@ -150,16 +200,21 @@ const RestaurantScreen = ({
                     <View style={styles.mainContainer}>
                         <View style={styles.titleContainer}>
                             <Text style={styles.title}>{restaurant?.name}</Text>
-                            <Ionicons
-                                name={
-                                    isBookmarked
-                                        ? 'bookmark'
-                                        : 'bookmark-outline'
-                                }
-                                color={Colors.DEFAULT_YELLOW}
-                                size={24}
-                                onPress={() => setIsBookmarked(!isBookmarked)}
-                            />
+                            <TouchableOpacity onPress={handleBookmarkToggle}>
+                                <Ionicons
+                                    name={
+                                        isBookmarked
+                                            ? 'bookmark'
+                                            : 'bookmark-outline'
+                                    }
+                                    color={
+                                        isBookmarked
+                                            ? Colors.DEFAULT_YELLOW
+                                            : Colors.DEFAULT_GREY
+                                    }
+                                    size={24}
+                                />
+                            </TouchableOpacity>
                         </View>
                         <Text style={styles.tagText}>
                             {restaurant?.tags?.length > 4

@@ -10,6 +10,7 @@ import FoodCard from './FoodCard';
 import SkeletonRestaurantCard from './SkeletonRestaurantCard';
 import SkeletonRestaurantMediumCard from './SkeletonRestaurantMediumCard';
 import SkeletonFoodCard from './SkeletonFoodCard';
+import BookmarkCard from './BookmarkCard';
 
 export {
     WelcomeCard,
@@ -23,5 +24,6 @@ export {
     FoodCard,
     SkeletonRestaurantCard,
     SkeletonRestaurantMediumCard,
-    SkeletonFoodCard
+    SkeletonFoodCard,
+    BookmarkCard
 };

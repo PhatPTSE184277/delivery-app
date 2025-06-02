@@ -24,6 +24,7 @@ import {
     removeFromCartAsync
 } from '../reduxs/reducers/cartReducer';
 import { authSelector } from '../reduxs/reducers/authReducer';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const setStyle = (isActive) =>
     isActive
@@ -107,6 +108,18 @@ const FoodScreen = ({ navigation, route }) => {
             />
             <ScrollView>
                 <Separator height={Display.setWidth(100)} />
+                     <View style={styles.backButtonContainer}>
+                                        <TouchableOpacity
+                                            style={styles.backButton}
+                                            onPress={() => navigation.goBack()}
+                                        >
+                                            <Ionicons
+                                                name='chevron-back-outline'
+                                                size={30}
+                                                color={Colors.DEFAULT_WHITE}
+                                            />
+                                        </TouchableOpacity>
+                                    </View>
                 <View style={styles.mainContainer}>
                     <View style={styles.titleHeaderContainer}>
                         <Text style={styles.titleText}>{food?.name}</Text>
@@ -366,5 +379,19 @@ const styles = StyleSheet.create({
         fontSize: 14,
         lineHeight: 14 * 1.4,
         fontFamily: Fonts.POPPINS_MEDIUM
+    },
+     backButtonContainer: {
+        position: 'absolute',
+        top: StatusBar.currentHeight + 10,
+        left: 15,
+        zIndex: 999
+    },
+    backButton: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: 'rgba(0, 0, 0, 0.2)',
+        alignItems: 'center',
+        justifyContent: 'center'
     }
 });
