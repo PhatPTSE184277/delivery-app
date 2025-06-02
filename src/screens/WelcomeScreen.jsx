@@ -13,7 +13,6 @@ import WelcomeCard from '../components/WelcomeCard';
 import { Display } from '../utils';
 import { Separator } from '../components';
 import { useRef } from 'react';
-import { StorageService } from '../services';
 import { useDispatch } from 'react-redux';
 import { setFirstTimeUse } from '../reduxs/reducers/authReducer'; //
 

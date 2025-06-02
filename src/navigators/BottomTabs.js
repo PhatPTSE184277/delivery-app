@@ -1,5 +1,5 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { BookmarkScreen, CartScreen, HomeScreen } from '../screens';
+import { AccountScreen, BookmarkScreen, CartScreen, HomeScreen } from '../screens';
 import React from 'react';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Colors } from '../contants';
@@ -49,6 +49,15 @@ export default () => {
                 options={{
                     tabBarIcon: ({ color }) => (
                         <Ionicons name='cart-outline' size={23} color={color} />
+                    )
+                }}
+            />
+              <BottomTabs.Screen
+                name='Account'
+                component={AccountScreen}
+                options={{
+                    tabBarIcon: ({ color }) => (
+                        <Ionicons name='person-outline' size={23} color={color} />
                     )
                 }}
             />
