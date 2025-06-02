@@ -15,7 +15,7 @@ import { Separator } from '../components';
 import { useRef } from 'react';
 import { StorageService } from '../services';
 import { useDispatch } from 'react-redux';
-import GeneralAction from '../actions/GeneralAction';
+import { setFirstTimeUse } from '../reduxs/reducers/authReducer'; //
 
 const pageStyle = (isActive) =>
     isActive
@@ -53,10 +53,9 @@ const WelcomeScreen = ({navigation}) => {
 
     const dispatch = useDispatch();
 
-    const navigate = () => {
-        StorageService.getFirstTimeUse().then(() => {
-            dispatch(GeneralAction.setIsFirstTimeUse());
-        })
+      const navigate = () => {
+        dispatch(setFirstTimeUse(false));
+        navigation.navigate('Signin');
     }
 
     return (

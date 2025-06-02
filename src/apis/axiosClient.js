@@ -1,14 +1,19 @@
 import axios from "axios";
 import queryString from "query-string";
-import { BASE_API_URL } from "@env";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const baseURL = 'http://10.0.2.2:8080/';
 
 const getAccessToken = async () => {
     try {
-        const res = await AsyncStorage.getItem('authData');
-        return res ? JSON.parse(res).token : '';
+        const authDataString = await AsyncStorage.getItem('Auth_Data');
+        if (authDataString) {
+            const authData = JSON.parse(authDataString);
+            if (authData && authData.token) {
+                return authData.token;
+            }
+        }
+        return '';
     } catch (error) {
         console.log('Error getting access token:', error);
         return '';

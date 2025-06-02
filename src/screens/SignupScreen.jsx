@@ -16,6 +16,8 @@ import { Separator } from '../components';
 import { TouchableOpacity } from 'react-native';
 import axiosClient from '../apis/axiosClient';
 import LottieView from 'lottie-react-native';
+import { useDispatch } from 'react-redux';
+import { setFirstTimeUse } from '../reduxs/reducers/authReducer';
 
 const SignupScreen = ({ navigation }) => {
     const [isPasswordShow, setIsPasswordShow] = useState(false);
@@ -23,8 +25,9 @@ const SignupScreen = ({ navigation }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const dispatch = useDispatch();
 
-    const handleRegister = async () => {
+     const handleRegister = async () => {
         let user = {
             username,
             email,
@@ -34,6 +37,7 @@ const SignupScreen = ({ navigation }) => {
             setIsLoading(true);
             const response = await axiosClient.post('auth/register', user);
             if (response && response.data) {
+                dispatch(setFirstTimeUse(false));
                 Alert.alert('Registration Successful', response.message);
                 navigation.navigate('Signin');
             }

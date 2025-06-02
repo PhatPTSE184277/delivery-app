@@ -14,11 +14,10 @@ import Feather from 'react-native-vector-icons/Feather';
 import { TouchableOpacity } from 'react-native';
 import { Colors, Fonts, Images } from '../contants';
 import { Display } from '../utils';
-import { GeneralAction } from '../actions';
 import axiosClient from '../apis/axiosClient';
 import LottieView from 'lottie-react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { StorageService } from '../services';
+import { addAuth, setFirstTimeUse } from '../reduxs/reducers/authReducer';
 
 const SignInScreen = ({ navigation }) => {
     const [isPasswordShow, setIsPasswordShow] = useState(false);
@@ -36,8 +35,15 @@ const SignInScreen = ({ navigation }) => {
             setIsLoading(true);
             const response = await axiosClient.post('auth/login', user);
             if (response && response.data) {
-                StorageService.setToken(response.data.token);
-                dispatch(GeneralAction.setToken(response.data.token))
+                const authData = {
+                    token: response.data.token,
+                    username: response.data.username,
+                    email: response.data.email,
+                    _id: response.data._id || '',
+                    isFirstTimeUse: false
+                };
+                dispatch(setFirstTimeUse(false));
+                dispatch(addAuth(authData));
                 Alert.alert('Login Successful', response.message);
             }
         } catch (error) {
@@ -49,7 +55,6 @@ const SignInScreen = ({ navigation }) => {
             setIsLoading(false);
         }
     };
-
     return (
         <View style={styles.container}>
             <StatusBar
@@ -139,7 +144,7 @@ const SignInScreen = ({ navigation }) => {
                         style={{ width: 50, height: 50 }}
                     />
                 ) : (
-                    <Text style={styles.signinButtonText}>Create Account</Text>
+                    <Text style={styles.signinButtonText}>Sign In</Text>
                 )}
             </TouchableOpacity>
             <View style={styles.signupContainer}>

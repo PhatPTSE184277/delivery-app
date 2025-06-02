@@ -4,4 +4,14 @@ const COUNTRY_FLAG = {
   STYLE: {FLAT: 'flat', SHINY: 'shiny'},
 };
 
-export default { COUNTRY_FLAG };
+const baseURL = 'http://10.0.2.2:8080/';
+
+const STATIC_IMAGE = {
+  BASE_URL: `${baseURL}/images`,
+  TYPE: {POSTER: 'poster', LOGO: 'logo', GALLERY: 'gallery'},
+  SIZE: {SQUARE: 'square', LANDSCAPE: 'landscape', PORTRAIT: 'portrait'},
+  QUALITY: {SD: 'sd', HD: 'hd'},
+};
+
+
+export default { COUNTRY_FLAG, STATIC_IMAGE };
