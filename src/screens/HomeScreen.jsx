@@ -162,7 +162,7 @@ const HomeScreen = ({ navigation }) => {
                     ) : (
                         <FlatList
                             data={restaurants}
-                            keyExtractor={(item) => item?.id}
+                            keyExtractor={(item) => item?._id}
                             horizontal
                             ListHeaderComponent={() => <Separator width={20} />}
                             ListFooterComponent={() => <Separator width={20} />}
@@ -172,6 +172,10 @@ const HomeScreen = ({ navigation }) => {
                             renderItem={({ item }) => (
                                 <RestaurantCard
                                     {...item}
+                                    id={item?._id}
+                                    name={item?.name}
+                                    images={item?.images}
+                                    location={item?.location}
                                     navigate={(restaurantId) =>
                                         navigation.navigate('Restaurant', {
                                             restaurantId
@@ -228,7 +232,7 @@ const HomeScreen = ({ navigation }) => {
                     : restaurants?.map((item) => (
                           <RestaurantMediumCard
                               {...item}
-                              key={item?.id}
+                              key={item?._id}
                               navigate={(restaurantId) =>
                                   navigation.navigate('Restaurant', {
                                       restaurantId

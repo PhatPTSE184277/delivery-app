@@ -74,7 +74,12 @@ const AccountScreen = ({ navigation }) => {
                 </View>
             </View>
             <View style={styles.menuContainer}>
-                <TouchableOpacity style={styles.menuItem} activeOpacity={0.8}>
+                {/* UPDATE: Add onPress to My All Orders */}
+                <TouchableOpacity
+                    style={styles.menuItem}
+                    activeOpacity={0.8}
+                    onPress={() => navigation.navigate('OrderHistory')}
+                >
                     <View style={styles.menuIcon}>
                         <MaterialCommunityIcons
                             name='truck-fast-outline'
@@ -84,6 +89,7 @@ const AccountScreen = ({ navigation }) => {
                     </View>
                     <Text style={styles.menuText}>My All {'\n'}Orders</Text>
                 </TouchableOpacity>
+
                 <TouchableOpacity style={styles.menuItem} activeOpacity={0.8}>
                     <View
                         style={{
@@ -99,6 +105,7 @@ const AccountScreen = ({ navigation }) => {
                     </View>
                     <Text style={styles.menuText}>Offers {'&\n'} Promos</Text>
                 </TouchableOpacity>
+
                 <TouchableOpacity style={styles.menuItem} activeOpacity={0.8}>
                     <View
                         style={{

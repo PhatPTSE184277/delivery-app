@@ -2,13 +2,12 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axiosClient from '../../apis/axiosClient';
 
-// Async thunk để thêm bookmark
 export const addBookmarkAsync = createAsyncThunk(
     'bookmark/addBookmarkAsync',
-    async ({ restaurantId, username }, { rejectWithValue }) => {
+    async ({ restaurantId, userId }, { rejectWithValue }) => {
         try {
             const response = await axiosClient.post(`bookmark/${restaurantId}`, {
-                username
+                userId
             });
             return response.data;
         } catch (error) {
@@ -17,13 +16,12 @@ export const addBookmarkAsync = createAsyncThunk(
     }
 );
 
-// Async thunk để xóa bookmark
 export const removeBookmarkAsync = createAsyncThunk(
     'bookmark/removeBookmarkAsync',
-    async ({ restaurantId, username }, { rejectWithValue }) => {
+    async ({ restaurantId, userId }, { rejectWithValue }) => {
         try {
             const response = await axiosClient.delete(`bookmark/${restaurantId}`, {
-                data: { username }
+                data: { userId }
             });
             return { restaurantId };
         } catch (error) {
@@ -32,12 +30,11 @@ export const removeBookmarkAsync = createAsyncThunk(
     }
 );
 
-// Async thunk để lấy danh sách bookmark
 export const fetchBookmarksAsync = createAsyncThunk(
     'bookmark/fetchBookmarksAsync',
-    async (username, { rejectWithValue }) => {
+    async (userId, { rejectWithValue }) => {
         try {
-            const response = await axiosClient.get(`bookmark?username=${username}`);
+            const response = await axiosClient.get(`bookmark?userId=${userId}`);
             return response.data;
         } catch (error) {
             return rejectWithValue(error.message);
@@ -57,32 +54,26 @@ const bookmarkSlice = createSlice({
         data: initialState
     },
     reducers: {
-        // Thêm bookmark local
         addBookmark: (state, action) => {
             const bookmark = action.payload;
             const exists = state.data.bookmarks.find(item => item.id === bookmark.id);
             
             if (!exists) {
                 state.data.bookmarks.push(bookmark);
-                // Lưu vào AsyncStorage
                 AsyncStorage.setItem('bookmarks', JSON.stringify(state.data.bookmarks));
             }
         },
 
-        // Xóa bookmark local
         removeBookmark: (state, action) => {
             const { id } = action.payload;
             state.data.bookmarks = state.data.bookmarks.filter(item => item.id !== id);
-            // Lưu vào AsyncStorage
             AsyncStorage.setItem('bookmarks', JSON.stringify(state.data.bookmarks));
         },
 
-        // Set bookmarks từ storage
         setBookmarks: (state, action) => {
             state.data.bookmarks = action.payload;
         },
 
-        // Clear tất cả bookmarks
         clearBookmarks: (state) => {
             state.data.bookmarks = [];
             AsyncStorage.removeItem('bookmarks');
@@ -90,7 +81,6 @@ const bookmarkSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            // Add bookmark API
             .addCase(addBookmarkAsync.pending, (state) => {
                 state.data.loading = true;
             })
@@ -102,7 +92,6 @@ const bookmarkSlice = createSlice({
                 state.data.error = action.payload;
             })
 
-            // Remove bookmark API
             .addCase(removeBookmarkAsync.pending, (state) => {
                 state.data.loading = true;
             })
@@ -113,8 +102,6 @@ const bookmarkSlice = createSlice({
                 state.data.loading = false;
                 state.data.error = action.payload;
             })
-
-            // Fetch bookmarks API
             .addCase(fetchBookmarksAsync.pending, (state) => {
                 state.data.loading = true;
             })
@@ -143,16 +130,13 @@ const bookmarkSlice = createSlice({
 export const bookmarkReducer = bookmarkSlice.reducer;
 export const { addBookmark, removeBookmark, setBookmarks, clearBookmarks } = bookmarkSlice.actions;
 
-// Selectors
 export const bookmarkSelector = (state) => state.bookmarkReducer.data;
 export const bookmarksSelector = (state) => state.bookmarkReducer.data.bookmarks;
 
-// Check if restaurant is bookmarked
 export const isBookmarkedSelector = (state, restaurantId) => {
     return state.bookmarkReducer.data.bookmarks.some(item => item.id === restaurantId);
 };
 
-// Load bookmarks từ AsyncStorage
 export const loadBookmarksFromStorage = async () => {
     try {
         const bookmarks = await AsyncStorage.getItem('bookmarks');

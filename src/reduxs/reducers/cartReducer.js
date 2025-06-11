@@ -2,53 +2,50 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axiosClient from '../../apis/axiosClient';
 
-// Async thunk để thêm sản phẩm vào giỏ hàng qua API
 export const addToCartAsync = createAsyncThunk(
     'cart/addToCartAsync',
-    async ({ foodId, username }, { rejectWithValue }) => {
+    async ({ foodId, userId }, { rejectWithValue }) => {
         try {
             const response = await axiosClient.post(`cart/${foodId}`, {
-                username
+                userId
             });
             return response.data;
         } catch (error) {
             console.log('Error adding to cart:', error);
             return rejectWithValue(
-                error.message || 'Failed to add item to cart'
+                error.response?.data?.message || error.message || 'Failed to add item to cart'
             );
         }
     }
 );
 
-// Async thunk để xóa sản phẩm khỏi giỏ hàng qua API
 export const removeFromCartAsync = createAsyncThunk(
     'cart/removeFromCartAsync',
-    async ({ foodId, username }, { rejectWithValue }) => {
+    async ({ foodId, userId }, { rejectWithValue }) => {
         try {
             const response = await axiosClient.delete(`cart/${foodId}`, {
-                data: { username }
+                data: { userId }
             });
             return { foodId, ...response.data };
         } catch (error) {
             console.log('Error removing from cart:', error);
             return rejectWithValue(
-                error.message || 'Failed to remove item from cart'
+                error.response?.data?.message || error.message || 'Failed to remove item from cart'
             );
         }
     }
 );
 
-// Async thunk để lấy giỏ hàng từ API
 export const fetchCartAsync = createAsyncThunk(
     'cart/fetchCartAsync',
-    async (username, { rejectWithValue }) => {
+    async (userId, { rejectWithValue }) => {
         try {
-            const response = await axiosClient.get(`cart?username=${username}`);
+            const response = await axiosClient.get(`cart?userId=${userId}`);
             return response.data;
         } catch (error) {
             console.log('Error fetching cart:', error);
             return rejectWithValue(
-                error.message || 'Failed to fetch cart items'
+                error.response?.data?.message || error.message || 'Failed to fetch cart items'
             );
         }
     }
@@ -112,16 +109,13 @@ const cartSlice = createSlice({
                 const currentItem = state.data.items[existingItemIndex];
 
                 if (currentItem.count === 1) {
-                    // Remove item completely if count is 1
                     state.data.items = state.data.items.filter(
                         (item) => item.id !== id
                     );
                 } else {
-                    // Decrement count
                     state.data.items[existingItemIndex].count -= 1;
                 }
 
-                // Update totals
                 state.data.totalItems = state.data.items.reduce(
                     (sum, item) => sum + item.count,
                     0
@@ -131,7 +125,7 @@ const cartSlice = createSlice({
                     0
                 );
 
-                // Sync to local storage
+
                 syncCartToLocal(state.data);
             }
         },
@@ -148,15 +142,12 @@ const cartSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            // Xử lý thêm sản phẩm vào giỏ hàng
             .addCase(addToCartAsync.pending, (state) => {
                 state.data.loading = true;
                 state.data.error = null;
             })
             .addCase(addToCartAsync.fulfilled, (state, action) => {
                 state.data.loading = false;
-                console.log('Item added to cart in database:', action.payload);
-                // Không cần cập nhật state ở đây vì đã có action addToCart cập nhật local state
             })
             .addCase(addToCartAsync.rejected, (state, action) => {
                 state.data.loading = false;
@@ -167,7 +158,6 @@ const cartSlice = createSlice({
                 );
             })
 
-            // Xử lý xóa sản phẩm khỏi giỏ hàng
             .addCase(removeFromCartAsync.pending, (state) => {
                 state.data.loading = true;
                 state.data.error = null;
@@ -178,7 +168,6 @@ const cartSlice = createSlice({
                     'Item removed from cart in database:',
                     action.payload
                 );
-                // Không cần cập nhật state ở đây vì đã có action removeFromCart cập nhật local state
             })
             .addCase(removeFromCartAsync.rejected, (state, action) => {
                 state.data.loading = false;
@@ -189,14 +178,12 @@ const cartSlice = createSlice({
                 );
             })
 
-            // Xử lý lấy giỏ hàng từ API
             .addCase(fetchCartAsync.pending, (state) => {
                 state.data.loading = true;
                 state.data.error = null;
             })
             .addCase(fetchCartAsync.fulfilled, (state, action) => {
                 state.data.loading = false;
-                // Chuyển đổi dữ liệu API thành định dạng giỏ hàng nội bộ
                 if (action.payload && action.payload.data) {
                     const cartItems = action.payload.data.map((item) => ({
                         id: item.foodId,
@@ -207,7 +194,7 @@ const cartSlice = createSlice({
                     }));
 
                     state.data.items = cartItems;
-                    // Tính toán lại tổng
+
                     state.data.totalItems = cartItems.reduce(
                         (sum, item) => sum + item.count,
                         0
@@ -217,7 +204,6 @@ const cartSlice = createSlice({
                         0
                     );
 
-                    // Lưu vào local storage
                     syncCartToLocal(state.data);
                 }
             })
@@ -240,7 +226,6 @@ export const cartCountSelector = (state) => state.cartReducer.data.totalItems;
 export const cartLoadingSelector = (state) => state.cartReducer.data.loading;
 export const cartErrorSelector = (state) => state.cartReducer.data.error;
 
-// Helper selector to check if an item exists in cart
 export const itemInCartSelector = (state, itemId) => {
     const item = state.cartReducer.data.items.find(
         (item) => item.id === itemId
@@ -248,12 +233,10 @@ export const itemInCartSelector = (state, itemId) => {
     return item ? item.count : 0;
 };
 
-// Sync cart data to AsyncStorage
 const syncCartToLocal = (data) => {
     AsyncStorage.setItem('Cart_Data', JSON.stringify(data));
 };
 
-// Load cart data from AsyncStorage
 export const loadCartFromStorage = async () => {
     try {
         const cartData = await AsyncStorage.getItem('Cart_Data');

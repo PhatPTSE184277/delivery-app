@@ -17,53 +17,46 @@ const RestaurantCard = ({
     id,
     name,
     images: { poster },
-    tags,
-    distance,
-    time,
+    location,
     navigate
 }) => {
     const dispatch = useDispatch();
 
-    // Get bookmark status from Redux
     const isBookmarked = useSelector((state) =>
         isBookmarkedSelector(state, id)
     );
 
-    // Get current user
     const currentUser = useSelector((state) => state.authReducer.data);
 
-    // Handle bookmark toggle
     const handleBookmarkToggle = () => {
-        if (!currentUser?.username) {
+        if (!currentUser?._id) {
             console.log('User not logged in');
             return;
         }
 
         if (isBookmarked) {
-            // Remove bookmark
             dispatch(removeBookmark({ id }));
             dispatch(
                 removeBookmarkAsync({
                     restaurantId: id,
-                    username: currentUser.username
+                    userId: currentUser._id
                 })
             );
         } else {
-            // Add bookmark
             const bookmarkData = {
-                id,
+                id: id,
                 name,
                 image: poster,
                 description: '',
                 rating: 4.0,
-                address: distance
+                address: ''
             };
 
             dispatch(addBookmark(bookmarkData));
             dispatch(
                 addBookmarkAsync({
                     restaurantId: id,
-                    username: currentUser.username
+                    userId: currentUser._id
                 })
             );
         }
@@ -75,7 +68,10 @@ const RestaurantCard = ({
             activeOpacity={0.8}
             onPress={() => navigate(id)}
         >
-            <TouchableOpacity onPress={handleBookmarkToggle} style={styles.bookmark}>
+            <TouchableOpacity
+                onPress={handleBookmarkToggle}
+                style={styles.bookmark}
+            >
                 <Ionicons
                     name={isBookmarked ? 'bookmark' : 'bookmark-outline'}
                     color={
@@ -91,10 +87,11 @@ const RestaurantCard = ({
                 style={styles.posterStyle}
             />
             <Text style={styles.titleText}>{name}</Text>
-            <Text style={styles.tagText} numberOfLines={1} ellipsizeMode='tail'>
-                {tags?.length > 4
-                    ? tags.slice(0, 4).join(' • ') + ' ...'
-                    : tags?.join(' • ')}
+            <Text
+                style={[styles.tagText, { maxWidth: 250 }]}
+                ellipsizeMode='tail'
+            >
+                {location}
             </Text>
             <View style={styles.footerContainer}>
                 <View style={styles.rowAndCenter}>
@@ -105,26 +102,6 @@ const RestaurantCard = ({
                     />
                     <Text style={styles.ratingText}>4</Text>
                     <Text style={styles.reviewsText}>({10})</Text>
-                </View>
-                <View style={styles.rowAndCenter}>
-                    <View style={styles.timeAndDistanceContainer}>
-                        <Ionicons
-                            name='location-outline'
-                            color={Colors.DEFAULT_YELLOW}
-                            size={15}
-                        />
-                        <Text style={styles.timeAndDistanceText}>
-                            {distance}
-                        </Text>
-                    </View>
-                    <View style={styles.timeAndDistanceContainer}>
-                        <Ionicons
-                            name='time-outline'
-                            color={Colors.DEFAULT_YELLOW}
-                            size={15}
-                        />
-                        <Text style={styles.timeAndDistanceText}>{time}</Text>
-                    </View>
                 </View>
             </View>
         </TouchableOpacity>
@@ -171,21 +148,6 @@ const styles = StyleSheet.create({
     rowAndCenter: {
         flexDirection: 'row',
         alignItems: 'center'
-    },
-    timeAndDistanceContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 5,
-        paddingVertical: 3,
-        backgroundColor: Colors.LIGHT_YELLOW,
-        borderRadius: 12,
-        marginHorizontal: 3
-    },
-    timeAndDistanceText: {
-        fontSize: 10,
-        lineHeight: 10 * 1.4,
-        fontFamily: Fonts.POPPINS_BOLD,
-        color: Colors.DEFAULT_YELLOW
     },
     ratingText: {
         marginLeft: 5,

@@ -15,7 +15,7 @@ import { TouchableOpacity } from 'react-native';
 const VerificationScreen = ({
     navigation,
     route: {
-        params: { phoneNumber }
+        params: { email }
     }
 }) => {
     const firstInput = useRef();
@@ -49,7 +49,7 @@ const VerificationScreen = ({
             <Text style={styles.title}>OTP Verification</Text>
             <Text style={styles.content}>
                 Enter the OTP number just sent you at{' '}
-                <Text style={styles.phoneNumberText}>{phoneNumber}</Text>
+                <Text style={styles.phoneNumberText}>{email}</Text>
             </Text>
             <View style={styles.otpContainer}>
                 <View style={styles.otpBox}>

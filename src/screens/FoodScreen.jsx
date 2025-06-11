@@ -43,7 +43,7 @@ const FoodScreen = ({ navigation, route }) => {
         if (food) {
             dispatch(
                 addToCart({
-                    id: food.id,
+                    id: food._id,
                     name: food.name,
                     price: food.price,
                     image: food.image,
@@ -51,11 +51,12 @@ const FoodScreen = ({ navigation, route }) => {
                 })
             );
 
-            if (authData && authData.username) {
+            // Sửa: Dùng authData._id thay vì authData.username
+            if (authData && authData._id) {
                 dispatch(
                     addToCartAsync({
-                        foodId: food.id,
-                        username: authData.username
+                        foodId: food._id,
+                        userId: authData._id // Sửa: userId thay vì username
                     })
                 );
             }
@@ -65,11 +66,12 @@ const FoodScreen = ({ navigation, route }) => {
     const handleRemoveFromCart = () => {
         dispatch(removeFromCart({ id: foodId }));
 
-        if (authData && authData.username) {
+        // Sửa: Dùng authData._id thay vì authData.username
+        if (authData && authData._id) {
             dispatch(
                 removeFromCartAsync({
                     foodId: foodId,
-                    username: authData.username
+                    userId: authData._id // Sửa: userId thay vì username
                 })
             );
         }
@@ -78,8 +80,14 @@ const FoodScreen = ({ navigation, route }) => {
     const getFood = async () => {
         try {
             const response = await axiosClient.get(`food/${foodId}`);
-            if (response && response.data) {
+            
+            console.log('Food response:', response);
+            
+            // Sửa: Kiểm tra response structure phù hợp với backend
+            if (response && response.data && response.data.food) {
                 setFood(response.data.food);
+            } else {
+                console.error('Invalid food response structure:', response);
             }
         } catch (error) {
             console.error('Error fetching food:', error);
@@ -108,18 +116,18 @@ const FoodScreen = ({ navigation, route }) => {
             />
             <ScrollView>
                 <Separator height={Display.setWidth(100)} />
-                     <View style={styles.backButtonContainer}>
-                                        <TouchableOpacity
-                                            style={styles.backButton}
-                                            onPress={() => navigation.goBack()}
-                                        >
-                                            <Ionicons
-                                                name='chevron-back-outline'
-                                                size={30}
-                                                color={Colors.DEFAULT_WHITE}
-                                            />
-                                        </TouchableOpacity>
-                                    </View>
+                <View style={styles.backButtonContainer}>
+                    <TouchableOpacity
+                        style={styles.backButton}
+                        onPress={() => navigation.goBack()}
+                    >
+                        <Ionicons
+                            name='chevron-back-outline'
+                            size={30}
+                            color={Colors.DEFAULT_WHITE}
+                        />
+                    </TouchableOpacity>
+                </View>
                 <View style={styles.mainContainer}>
                     <View style={styles.titleHeaderContainer}>
                         <Text style={styles.titleText}>{food?.name}</Text>
@@ -134,22 +142,6 @@ const FoodScreen = ({ navigation, route }) => {
                             />
                             <Text style={styles.ratingText}>4.2</Text>
                             <Text style={styles.reviewsText}>(255)</Text>
-                        </View>
-                        <View style={styles.rowAndCenter}>
-                            <Image
-                                style={styles.iconImage}
-                                source={Images.DELIVERY_TIME}
-                            />
-                            <Text style={styles.deliveryText}>20 min</Text>
-                        </View>
-                        <View style={styles.rowAndCenter}>
-                            <Image
-                                style={styles.iconImage}
-                                source={Images.DELIVERY_CHARGE}
-                            />
-                            <Text style={styles.deliveryText}>
-                                Free Delivery
-                            </Text>
                         </View>
                     </View>
                     <View style={styles.subMenuContainer}>
@@ -380,7 +372,7 @@ const styles = StyleSheet.create({
         lineHeight: 14 * 1.4,
         fontFamily: Fonts.POPPINS_MEDIUM
     },
-     backButtonContainer: {
+    backButtonContainer: {
         position: 'absolute',
         top: StatusBar.currentHeight + 10,
         left: 15,

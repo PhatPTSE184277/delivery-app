@@ -79,7 +79,6 @@ const RestaurantScreen = ({
     const [restaurant, setRestaurant] = useState();
     const [loading, setLoading] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState();
-    // const [isBookmarked, setIsBookmarked] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
     const dispatch = useDispatch();
 
@@ -89,43 +88,39 @@ const RestaurantScreen = ({
 
     const currentUser = useSelector((state) => state.authReducer.data);
 
-    // Handle bookmark toggle
     const handleBookmarkToggle = () => {
-        if (!currentUser?.username) {
+        if (!currentUser?._id) {
             console.log('User not logged in');
             return;
         }
 
         if (isBookmarked) {
-            // Remove bookmark
             dispatch(removeBookmark({ id: restaurantId }));
             dispatch(
                 removeBookmarkAsync({
                     restaurantId,
-                    username: currentUser.username
+                    userId: currentUser._id
                 })
             );
         } else {
-            // Add bookmark
             const bookmarkData = {
                 id: restaurantId,
                 name: restaurant?.name,
                 image: restaurant?.images?.cover,
                 description: restaurant?.description || '',
                 rating: restaurant?.rating || 4.2,
-                address: restaurant?.distance
+                address: restaurant?.location
             };
 
             dispatch(addBookmark(bookmarkData));
             dispatch(
                 addBookmarkAsync({
                     restaurantId,
-                    username: currentUser.username
+                    userId: currentUser._id
                 })
             );
         }
     };
-
     const getRestaurant = async () => {
         setLoading(true);
         try {
@@ -229,7 +224,7 @@ const RestaurantScreen = ({
                                 (455 Reviews)
                             </Text>
                         </View>
-                        <View style={styles.deliveryDetailsContainer}>
+                        {/* <View style={styles.deliveryDetailsContainer}>
                             <View style={styles.rowAndCenter}>
                                 <Image
                                     style={styles.deliveryDetailIcon}
@@ -239,7 +234,7 @@ const RestaurantScreen = ({
                                     Free Delivery
                                 </Text>
                             </View>
-                            <View style={styles.rowAndCenter}>
+                             <View style={styles.rowAndCenter}>
                                 <Image
                                     style={styles.deliveryDetailIcon}
                                     source={Images.DELIVERY_TIME}
@@ -256,13 +251,13 @@ const RestaurantScreen = ({
                                 <Text style={styles.deliveryDetailText}>
                                     {restaurant?.distance}
                                 </Text>
-                            </View>
+                            </View> 
                             <View style={styles.restaurantType}>
                                 <Text style={styles.restaurantTypeText}>
                                     {restaurant?.type}
                                 </Text>
                             </View>
-                        </View>
+                        </View> */}
                         <View style={styles.categoriesContainer}>
                             <FlatList
                                 data={restaurant?.categories}
@@ -297,11 +292,15 @@ const RestaurantScreen = ({
                                       )
                                       ?.map((item) => (
                                           <FoodCard
-                                              key={item?.id}
-                                              {...item}
+                                              key={item?._id}
+                                              _id={item?._id}
+                                              name={item?.name}
+                                              description={item?.description}
+                                              price={item?.price}
+                                              image={item?.image}
                                               navigate={() =>
                                                   navigation.navigate('Food', {
-                                                      foodId: item?.id
+                                                      foodId: item?._id
                                                   })
                                               }
                                           />

@@ -1,8 +1,9 @@
 import axios from "axios";
 import queryString from "query-string";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import  { BASE_API_URL } from '@env';
 
-const baseURL = 'http://10.0.2.2:8080/';
+const baseURL = BASE_API_URL;
 
 const getAccessToken = async () => {
     try {

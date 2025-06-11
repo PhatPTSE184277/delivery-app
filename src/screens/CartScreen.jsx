@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -6,7 +6,7 @@ import {
     StatusBar,
     ScrollView,
     TouchableOpacity,
-    Image,
+    Image
 } from 'react-native';
 import { Colors, Fonts, Images } from '../contants';
 import { FoodCard, Separator } from '../components';
@@ -18,15 +18,84 @@ import { useSelector } from 'react-redux';
 import {
     cartSelector,
     cartTotalSelector,
-    cartCountSelector,
+    cartCountSelector
 } from '../reduxs/reducers/cartReducer';
+import { authSelector } from '../reduxs/reducers/authReducer';
+import axiosClient from '../apis/axiosClient';
+import MapView, { Marker } from 'react-native-maps';
 
 const CartScreen = ({ navigation }) => {
     const cart = useSelector(cartSelector);
     const total = useSelector(cartTotalSelector);
     const count = useSelector(cartCountSelector);
+    const auth = useSelector(authSelector);
+
+    const [deliveryAddress, setDeliveryAddress] = useState({
+        title: 'Select Address',
+        address: 'No delivery address selected',
+        _id: null
+    });
+    const [isLoadingAddress, setIsLoadingAddress] = useState(true);
+
     const discount = 0;
-    const grandTotal = total - discount*total;
+    const grandTotal = total - discount;
+
+    useEffect(() => {
+        loadDefaultAddress();
+    }, [auth?._id]);
+
+    const loadDefaultAddress = async () => {
+        if (!auth?._id) {
+            setIsLoadingAddress(false);
+            return;
+        }
+
+        try {
+            const response = await axiosClient.get(
+                `/address?userId=${auth._id}`
+            );
+
+            console.log('Load address response:', response);
+
+            if (response.status === true && response.data.length > 0) {
+                const defaultAddr =
+                    response.data.find((addr) => addr.isDefault) ||
+                    response.data[0];
+                setDeliveryAddress(defaultAddr);
+            } else {
+                setDeliveryAddress({
+                    title: 'No Address',
+                    address: 'Please add a delivery address',
+                    _id: null
+                });
+            }
+        } catch (error) {
+            console.error('Load address error:', error);
+            setDeliveryAddress({
+                title: 'Error',
+                address: 'Failed to load address',
+                _id: null
+            });
+        } finally {
+            setIsLoadingAddress(false);
+        }
+    };
+
+    const onAddressSelect = (selectedAddress) => {
+        console.log('Selected address in Cart:', selectedAddress);
+        setDeliveryAddress({
+            _id: selectedAddress._id || new Date().getTime().toString(),
+            title: selectedAddress.title,
+            address: selectedAddress.address,
+            coordinates: selectedAddress.coordinates
+        });
+    };
+
+    const handleAddressChange = () => {
+        navigation.navigate('AddressListScreen', {
+            onAddressSelect: onAddressSelect
+        });
+    };
 
     return (
         <View style={styles.container}>
@@ -111,14 +180,140 @@ const CartScreen = ({ navigation }) => {
                             $ {grandTotal.toFixed(2)}
                         </Text>
                     </View>
-                    <TouchableOpacity style={styles.checkoutButton}>
+
+                    {/* Updated Delivery Address Section */}
+                    <View style={styles.deliveryAddressContainer}>
+                        <View style={styles.deliveryAddressHeader}>
+                            <View style={styles.deliveryToContainer}>
+                                <View style={styles.miniMapContainer}>
+                                    <View style={styles.mapPlaceholder}>
+                                        <Ionicons
+                                            name={
+                                                deliveryAddress._id
+                                                    ? 'location'
+                                                    : 'location-outline'
+                                            }
+                                            size={24}
+                                            color={
+                                                deliveryAddress._id
+                                                    ? Colors.DEFAULT_GREEN
+                                                    : Colors.DEFAULT_GREY
+                                            }
+                                        />
+                                        <View style={styles.mapGrid}>
+                                            <View
+                                                style={[
+                                                    styles.gridLine,
+                                                    styles.horizontalLine1
+                                                ]}
+                                            />
+                                            <View
+                                                style={[
+                                                    styles.gridLine,
+                                                    styles.horizontalLine2
+                                                ]}
+                                            />
+                                            <View
+                                                style={[
+                                                    styles.gridLine,
+                                                    styles.verticalLine1
+                                                ]}
+                                            />
+                                            <View
+                                                style={[
+                                                    styles.gridLine,
+                                                    styles.verticalLine2
+                                                ]}
+                                            />
+                                        </View>
+                                    </View>
+                                </View>
+
+                                <View style={styles.deliveryTextContainer}>
+                                    <Text style={styles.deliveryToText}>
+                                        Deliver To: {deliveryAddress.title}
+                                    </Text>
+                                    <View style={styles.addressContainer}>
+                                        <Ionicons
+                                            name='location'
+                                            size={12}
+                                            color={
+                                                deliveryAddress._id
+                                                    ? Colors.DEFAULT_GREY
+                                                    : Colors.LIGHT_GREY
+                                            }
+                                        />
+                                        <Text
+                                            style={[
+                                                styles.addressText,
+                                                !deliveryAddress._id &&
+                                                    styles.noAddressText
+                                            ]}
+                                            numberOfLines={2}
+                                        >
+                                            {isLoadingAddress
+                                                ? 'Loading address...'
+                                                : deliveryAddress.address}
+                                        </Text>
+                                    </View>
+                                </View>
+                            </View>
+
+                            <TouchableOpacity
+                                onPress={handleAddressChange}
+                                style={styles.changeButton}
+                            >
+                                <Text style={styles.changeText}>
+                                    {deliveryAddress._id ? 'Change' : 'Add'}
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        {/* Show warning if no address selected */}
+                        {!deliveryAddress._id && !isLoadingAddress && (
+                            <View style={styles.addressWarning}>
+                                <Ionicons
+                                    name='warning-outline'
+                                    size={16}
+                                    color={Colors.DEFAULT_YELLOW}
+                                />
+                                <Text style={styles.warningText}>
+                                    Please select a delivery address to continue
+                                </Text>
+                            </View>
+                        )}
+                    </View>
+
+                    <TouchableOpacity
+                        style={[
+                            styles.checkoutButton,
+                            !deliveryAddress._id &&
+                                styles.disabledCheckoutButton
+                        ]}
+                        onPress={() => {
+                            if (!deliveryAddress._id) {
+                                handleAddressChange();
+                                return;
+                            }
+                            navigation.navigate('Checkout', {
+                                deliveryAddress: deliveryAddress,
+                                cartItems: cart?.items,
+                                total: grandTotal
+                            });
+                        }}
+                        disabled={isLoadingAddress}
+                    >
                         <View style={styles.rowAndCenter}>
                             <Ionicons
                                 name='cart-outline'
                                 color={Colors.DEFAULT_WHITE}
                                 size={20}
                             />
-                            <Text style={styles.checkoutText}>Checkout</Text>
+                            <Text style={styles.checkoutText}>
+                                {!deliveryAddress._id
+                                    ? 'Select Address'
+                                    : 'Checkout'}
+                            </Text>
                         </View>
                         <Text style={styles.checkoutText}>
                             $ {grandTotal.toFixed(2)}
@@ -137,7 +332,10 @@ const CartScreen = ({ navigation }) => {
                     <Text style={styles.emptyCartSubText}>
                         Go ahead and order some tasty food
                     </Text>
-                    <TouchableOpacity style={styles.addButtonEmpty}  onPress={() => navigation.navigate('Home')}>
+                    <TouchableOpacity
+                        style={styles.addButtonEmpty}
+                        onPress={() => navigation.navigate('Home')}
+                    >
                         <AntDesign
                             name='plus'
                             color={Colors.DEFAULT_WHITE}
@@ -155,6 +353,55 @@ const CartScreen = ({ navigation }) => {
 export default CartScreen;
 
 const styles = StyleSheet.create({
+    deliveryToText: {
+        fontSize: 14,
+        fontFamily: Fonts.POPPINS_MEDIUM,
+        color: Colors.DEFAULT_BLACK,
+        marginBottom: 4
+    },
+    changeButton: {
+        paddingHorizontal: 8,
+        paddingVertical: 4
+    },
+    changeText: {
+        fontSize: 14,
+        fontFamily: Fonts.POPPINS_MEDIUM,
+        color: Colors.DEFAULT_GREEN // Changed from DEFAULT_YELLOW to GREEN
+    },
+    addressText: {
+        fontSize: 12,
+        fontFamily: Fonts.POPPINS_REGULAR,
+        color: Colors.DEFAULT_GREY,
+        marginLeft: 4,
+        flex: 1
+    },
+    noAddressText: {
+        fontStyle: 'italic',
+        color: Colors.LIGHT_GREY
+    },
+    // New styles
+    addressWarning: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 8,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        backgroundColor: '#FFF9E6',
+        borderRadius: 6,
+        borderLeftWidth: 3,
+        borderLeftColor: Colors.DEFAULT_YELLOW
+    },
+    warningText: {
+        fontSize: 12,
+        fontFamily: Fonts.POPPINS_REGULAR,
+        color: Colors.DEFAULT_YELLOW,
+        marginLeft: 6,
+        flex: 1
+    },
+    disabledCheckoutButton: {
+        backgroundColor: Colors.LIGHT_GREY
+    },
+
     container: {
         flex: 1,
         backgroundColor: Colors.DEFAULT_WHITE
@@ -231,6 +478,70 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.POPPINS_SEMI_BOLD,
         lineHeight: 20 * 1.4,
         color: Colors.DEFAULT_BLACK
+    },
+    deliveryAddressContainer: {
+        marginHorizontal: Display.setWidth(4),
+        paddingVertical: 15,
+        borderBottomWidth: 0.5,
+        borderBottomColor: Colors.LIGHT_GREY
+    },
+    deliveryAddressHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+    },
+    deliveryToContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        flex: 1
+    },
+    miniMapContainer: {
+        width: 50,
+        height: 50,
+        borderRadius: 8,
+        overflow: 'hidden',
+        marginRight: 12
+    },
+    mapPlaceholder: {
+        width: '100%',
+        height: '100%',
+        backgroundColor: '#E8F5E8',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 8,
+        position: 'relative'
+    },
+    mapGrid: {
+        position: 'absolute',
+        width: '100%',
+        height: '100%'
+    },
+    gridLine: {
+        position: 'absolute',
+        backgroundColor: Colors.LIGHT_GREY2 || '#E0E0E0'
+    },
+    horizontalLine1: {
+        width: '100%',
+        height: 1,
+        top: '30%'
+    },
+    horizontalLine2: {
+        width: '100%',
+        height: 1,
+        top: '70%'
+    },
+    verticalLine1: {
+        width: 1,
+        height: '100%',
+        left: '30%'
+    },
+    verticalLine2: {
+        width: 1,
+        height: '100%',
+        left: '70%'
+    },
+    deliveryTextContainer: {
+        flex: 1
     },
     checkoutButton: {
         flexDirection: 'row',

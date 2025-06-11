@@ -8,9 +8,11 @@ import {
     ForgotPasswordScreen,
     RegisterPhoneScreen,
     VerificationScreen,
-    HomeScreen,
     RestaurantScreen,
-    FoodScreen
+    FoodScreen,
+    CheckoutScreen,
+    AddressListScreen,
+    OrderHistoryScreen
 } from '../screens';
 import { useSelector, useDispatch } from 'react-redux';
 import { useEffect, useState } from 'react';
@@ -159,9 +161,20 @@ const Navigators = () => {
                             name='Restaurant'
                             component={RestaurantScreen}
                         />
-                         <Stack.Screen
-                            name='Food'
-                            component={FoodScreen}
+                        <Stack.Screen name='Food' component={FoodScreen} />
+                        <Stack.Screen
+                            name='Checkout'
+                            component={CheckoutScreen}
+                        />
+                        <Stack.Screen
+                            name='AddressListScreen'
+                            component={AddressListScreen}
+                            options={{ headerShown: false }}
+                        />
+                        <Stack.Screen
+                            name='OrderHistory'
+                            component={OrderHistoryScreen}
+                            options={{ headerShown: false }}
                         />
                     </>
                 )}

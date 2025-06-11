@@ -24,14 +24,7 @@ const RestaurantMediumCard = ({name, images: {logo}, time, distance, tags}) => {
           </View>
         </View>
         <Text style={styles.tagsText}>{tags?.join(' • ')}</Text>
-        <View style={styles.deliveryDetailsContainer}>
-          <View style={styles.rowAndCenter}>
-            <Image
-              source={Images.DELIVERY_CHARGE}
-              style={styles.deliveryDetailsIcon}
-            />
-            <Text style={styles.deliveryDetailsText}>Free Delivery</Text>
-          </View>
+        {/* <View style={styles.deliveryDetailsContainer}>
           <View style={styles.rowAndCenter}>
             <Image
               source={Images.DELIVERY_TIME}
@@ -43,7 +36,7 @@ const RestaurantMediumCard = ({name, images: {logo}, time, distance, tags}) => {
             <Image style={styles.deliveryDetailsIcon} />
             <Text style={styles.deliveryDetailsText}>{distance}</Text>
           </View>
-        </View>
+        </View> */}
       </View>
     </View>
   );

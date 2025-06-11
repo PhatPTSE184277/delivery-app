@@ -33,22 +33,23 @@ const SignupScreen = ({ navigation }) => {
             email,
             password
         };
-        try {
-            setIsLoading(true);
-            const response = await axiosClient.post('auth/register', user);
-            if (response && response.data) {
-                dispatch(setFirstTimeUse(false));
-                Alert.alert('Registration Successful', response.message);
-                navigation.navigate('Signin');
-            }
-        } catch (error) {
-            Alert.alert(
-                'Registration Failed',
-                error?.message || 'Something went wrong'
-            );
-        } finally {
-            setIsLoading(false);
-        }
+        // try {
+        //     setIsLoading(true);
+        //     const response = await axiosClient.post('auth/register', user);
+        //     if (response && response.data) {
+        //         dispatch(setFirstTimeUse(false));
+        //         Alert.alert('Registration Successful', response.message);
+        //         navigation.navigate('Signin');
+        //     }
+        // } catch (error) {
+        //     Alert.alert(
+        //         'Registration Failed',
+        //         error?.message || 'Something went wrong'
+        //     );
+        // } finally {
+        //     setIsLoading(false);
+        // }
+        navigation.navigate('Verification', { email: email });
     };
 
     return (

@@ -1,56 +1,10 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import AntDesign from 'react-native-vector-icons/AntDesign';
 import { ApiContants, Colors, Fonts } from '../contants';
 import { StaticImageService } from '../services';
 import { Display } from '../utils';
-import { useDispatch, useSelector } from 'react-redux';
-import { 
-    addToCart, 
-    removeFromCart, 
-    itemInCartSelector,
-    addToCartAsync,
-    removeFromCartAsync
-} from '../reduxs/reducers/cartReducer';
-import { authSelector } from '../reduxs/reducers/authReducer';
 
-const FoodCard = ({ _id, name, description, price, image, navigate }) => {
-    const dispatch = useDispatch();
-    const authData = useSelector(authSelector);
-    const itemCount = useSelector(state => itemInCartSelector(state, _id));
-    
-    const handleAddToCart = () => {
-        dispatch(addToCart({
-            id: _id,
-            name,
-            price,
-            image,
-            count: 1
-        }));
-        
-        if (authData && authData._id) {
-            dispatch(addToCartAsync({
-                foodId: _id,
-                userId: authData._id
-            }));
-        } else {
-            console.log('User not logged in, only updating local cart');
-        }
-    };
-    
-    const handleRemoveFromCart = () => {
-        dispatch(removeFromCart({ id: _id }));
-        
-        if (authData && authData._id) {
-            dispatch(removeFromCartAsync({
-                foodId: _id,
-                userId: authData._id
-            }));
-        } else {
-            console.log('User not logged in, only updating local cart');
-        }
-    };
-
+const CheckoutFoodCard = ({ id, name, description, price, image, quantity, navigate }) => {
     return (
         <View style={styles.container}>
             <TouchableOpacity onPress={() => navigate()} activeOpacity={0.8}>
@@ -78,27 +32,8 @@ const FoodCard = ({ _id, name, description, price, image, navigate }) => {
                 </TouchableOpacity>
                 <View style={styles.footerContainer}>
                     <Text style={styles.priceText}>$ {price}</Text>
-                    <View style={styles.itemAddContainer}>
-                        {itemCount > 0 ? (
-                            <>
-                                <AntDesign
-                                    name='minus'
-                                    color={Colors.DEFAULT_YELLOW}
-                                    size={18}
-                                    onPress={handleRemoveFromCart}
-                                />
-                                <Text style={styles.itemCountText}>
-                                    {itemCount}
-                                </Text>
-                            </>
-                        ) : null}
-
-                        <AntDesign
-                            name='plus'
-                            color={Colors.DEFAULT_YELLOW}
-                            size={18}
-                            onPress={handleAddToCart}
-                        />
+                    <View style={styles.quantityDisplayContainer}>
+                        <Text style={styles.quantityText}>{quantity}</Text>
                     </View>
                 </View>
             </View>
@@ -153,21 +88,22 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         marginHorizontal: 5
     },
-    itemAddContainer: {
+    quantityDisplayContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: Colors.LIGHT_GREY2,
-        paddingVertical: 5,
-        paddingHorizontal: 10,
-        borderRadius: 8
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        borderRadius: 8,
+        minWidth: 40,
+        justifyContent: 'center'
     },
-    itemCountText: {
+    quantityText: {
         color: Colors.DEFAULT_BLACK,
         fontFamily: Fonts.POPPINS_MEDIUM,
         fontSize: 14,
-        lineHeight: 14 * 1.4,
-        marginHorizontal: 8
+        lineHeight: 14 * 1.4
     }
 });
 
-export default FoodCard;
+export default CheckoutFoodCard;

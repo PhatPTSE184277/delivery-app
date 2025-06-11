@@ -4,7 +4,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const initialState = {
     token: '',
     _id: '',
-    name: '',
+    username: '',
+    email: '',
     isFirstTimeUse: true
 };
 
