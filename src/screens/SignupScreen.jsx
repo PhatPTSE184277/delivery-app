@@ -21,35 +21,74 @@ import { setFirstTimeUse } from '../reduxs/reducers/authReducer';
 
 const SignupScreen = ({ navigation }) => {
     const [isPasswordShow, setIsPasswordShow] = useState(false);
+    const [isConfirmPasswordShow, setIsConfirmPasswordShow] = useState(false);
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const dispatch = useDispatch();
 
-     const handleRegister = async () => {
+    const handleRegister = async () => {
+        // Validation
+        if (!username || !email || !password || !confirmPassword) {
+            Alert.alert('Error', 'Please fill in all fields');
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            Alert.alert('Error', 'Passwords do not match');
+            return;
+        }
+
+        if (password.length < 6) {
+            Alert.alert('Error', 'Password must be at least 6 characters');
+            return;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            Alert.alert('Error', 'Please enter a valid email address');
+            return;
+        }
+
         let user = {
             username,
             email,
             password
         };
-        // try {
-        //     setIsLoading(true);
-        //     const response = await axiosClient.post('auth/register', user);
-        //     if (response && response.data) {
-        //         dispatch(setFirstTimeUse(false));
-        //         Alert.alert('Registration Successful', response.message);
-        //         navigation.navigate('Signin');
-        //     }
-        // } catch (error) {
-        //     Alert.alert(
-        //         'Registration Failed',
-        //         error?.message || 'Something went wrong'
-        //     );
-        // } finally {
-        //     setIsLoading(false);
-        // }
-        navigation.navigate('Verification', { email: email });
+
+        try {
+            setIsLoading(true);
+            const response = await axiosClient.post('auth/register', user);
+
+            if (response && response.message) {
+                Alert.alert(
+                    'Registration Successful!',
+                    'Please check your email for verification code.',
+                    [
+                        {
+                            text: 'OK',
+                            onPress: () =>
+                                navigation.navigate('Verification', {
+                                    email: email,
+                                    username: username
+                                })
+                        }
+                    ]
+                );
+            }
+        } catch (error) {
+            console.log('Registration error:', error);
+            Alert.alert(
+                'Registration Failed',
+                error?.response?.data?.message ||
+                    error?.message ||
+                    'Something went wrong'
+            );
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -72,6 +111,8 @@ const SignupScreen = ({ navigation }) => {
             <Text style={styles.content}>
                 Enter your email, choose a username and password
             </Text>
+
+            {/* Username Input */}
             <View style={styles.inputContainer}>
                 <View style={styles.inputSubContainer}>
                     <Feather
@@ -86,10 +127,13 @@ const SignupScreen = ({ navigation }) => {
                         selectionColor={Colors.DEFAULT_GREY}
                         style={styles.inputText}
                         onChangeText={(text) => setUsername(text)}
+                        value={username}
                     />
                 </View>
             </View>
             <Separator height={15} />
+
+            {/* Email Input */}
             <View style={styles.inputContainer}>
                 <View style={styles.inputSubContainer}>
                     <Feather
@@ -104,12 +148,15 @@ const SignupScreen = ({ navigation }) => {
                         selectionColor={Colors.DEFAULT_GREY}
                         style={styles.inputText}
                         onChangeText={(text) => setEmail(text)}
+                        value={email}
                         keyboardType='email-address'
                         autoCapitalize='none'
                     />
                 </View>
             </View>
             <Separator height={15} />
+
+            {/* Password Input */}
             <View style={styles.inputContainer}>
                 <View style={styles.inputSubContainer}>
                     <Feather
@@ -125,6 +172,7 @@ const SignupScreen = ({ navigation }) => {
                         selectionColor={Colors.DEFAULT_GREY}
                         style={styles.inputText}
                         onChangeText={(text) => setPassword(text)}
+                        value={password}
                     />
                     <Feather
                         name={isPasswordShow ? 'eye-off' : 'eye'}
@@ -135,6 +183,38 @@ const SignupScreen = ({ navigation }) => {
                     />
                 </View>
             </View>
+            <Separator height={15} />
+
+            {/* Confirm Password Input */}
+            <View style={styles.inputContainer}>
+                <View style={styles.inputSubContainer}>
+                    <Feather
+                        name='lock'
+                        size={22}
+                        color={Colors.DEFAULT_GREY}
+                        style={{ marginRight: 10 }}
+                    />
+                    <TextInput
+                        secureTextEntry={isConfirmPasswordShow ? false : true}
+                        placeholder='Confirm Password'
+                        placeholderTextColor={Colors.DEFAULT_GREY}
+                        selectionColor={Colors.DEFAULT_GREY}
+                        style={styles.inputText}
+                        onChangeText={(text) => setConfirmPassword(text)}
+                        value={confirmPassword}
+                    />
+                    <Feather
+                        name={isConfirmPasswordShow ? 'eye-off' : 'eye'}
+                        size={22}
+                        color={Colors.DEFAULT_GREY}
+                        style={{ marginRight: 10 }}
+                        onPress={() =>
+                            setIsConfirmPasswordShow(!isConfirmPasswordShow)
+                        }
+                    />
+                </View>
+            </View>
+
             <TouchableOpacity
                 style={[styles.signinButton, isLoading && { opacity: 0.7 }]}
                 onPress={() => handleRegister()}
@@ -151,6 +231,18 @@ const SignupScreen = ({ navigation }) => {
                     <Text style={styles.signinButtonText}>Create Account</Text>
                 )}
             </TouchableOpacity>
+
+            {/* Sign In Link */}
+            <View style={styles.signinContainer}>
+                <Text style={styles.accountText}>Already have an account?</Text>
+                <Text
+                    style={styles.signinText}
+                    onPress={() => navigation.navigate('Signin')}
+                >
+                    Sign In
+                </Text>
+            </View>
+
             <Text style={styles.orText}>OR</Text>
             <TouchableOpacity style={styles.facebookButton}>
                 <View style={styles.socialButtonsContainer}>
@@ -305,5 +397,25 @@ const styles = StyleSheet.create({
     toggleContainer: {
         flexDirection: 'row',
         alignItems: 'center'
+    },
+    signinContainer: {
+        marginHorizontal: 20,
+        justifyContent: 'center',
+        paddingVertical: 20,
+        flexDirection: 'row',
+        alignItems: 'center'
+    },
+    accountText: {
+        fontSize: 13,
+        lineHeight: 13 * 1.4,
+        color: Colors.DEFAULT_BLACK,
+        fontFamily: Fonts.POPPINS_MEDIUM
+    },
+    signinText: {
+        fontSize: 13,
+        lineHeight: 13 * 1.4,
+        color: Colors.DEFAULT_GREEN,
+        fontFamily: Fonts.POPPINS_MEDIUM,
+        marginLeft: 5
     }
 });

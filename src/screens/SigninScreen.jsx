@@ -24,16 +24,25 @@ const SignInScreen = ({ navigation }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
     const dispatch = useDispatch();
 
     const handleLogin = async () => {
+        if (!username || !password) {
+            setErrorMessage('Please fill in all fields');
+            return;
+        }
+
         let user = {
             username,
             password
         };
+        
         try {
             setIsLoading(true);
+            setErrorMessage('');
             const response = await axiosClient.post('auth/login', user);
+            
             if (response && response.data) {
                 const authData = {
                     token: response.data.token,
@@ -45,108 +54,153 @@ const SignInScreen = ({ navigation }) => {
                 dispatch(setFirstTimeUse(false));
                 dispatch(addAuth(authData));
                 Alert.alert('Login Successful', response.message);
+            }        } catch (error) {
+            console.log('Login error:', error);
+            
+            // Xử lý trường hợp email chưa verify theo format axiosClient
+            if (error?.message === 'Please verify your email before logging in') {
+                Alert.alert(
+                    'Email Not Verified',
+                    'Please verify your email before logging in. Would you like to go to verification screen?',
+                    [
+                        {
+                            text: 'Cancel',
+                            style: 'cancel'
+                        },
+                        {
+                            text: 'Verify Email',
+                            onPress: () => {
+                                // Tìm user bằng username để lấy email
+                                navigation.navigate('Verification', { 
+                                    email: username, // Giả sử username có thể là email
+                                    username: username 
+                                });
+                            }
+                        }
+                    ]
+                );
+            } else {
+                Alert.alert(
+                    'Login Failed',
+                    error?.message || 'Invalid username or password'
+                );
             }
-        } catch (error) {
-            Alert.alert(
-                'Login Failed',
-                error?.message || 'Something went wrong'
-            );
         } finally {
             setIsLoading(false);
-        }
-    };
+        }    };
+
     return (
         <View style={styles.container}>
-            <StatusBar
-                barStyle='dark-content'
-                backgroundColor={Colors.DEFAULT_WHITE}
-                translucent
+        <StatusBar
+            barStyle='dark-content'
+            backgroundColor={Colors.DEFAULT_WHITE}
+            translucent
+        />
+        <Separator height={StatusBar.currentHeight} />
+        <View style={styles.headerContainer}>
+            <Ionicons
+                name='chevron-back-outline'
+                size={30}
+                onPress={() => navigation.goBack()}
             />
-            <Separator height={StatusBar.currentHeight} />
-            <View style={styles.headerContainer}>
-                <Ionicons
-                    name='chevron-back-outline'
-                    size={30}
-                    onPress={() => navigation.goBack()}
+            <Text style={styles.headerTitle}>Sign In</Text>
+        </View>
+        <Text style={styles.title}>Welcome</Text>
+        <Text style={styles.content}>
+            Enter your username and password, and enjoy ordering food
+        </Text>
+        
+        {/* CHỈ GIỮ LẠI 1 USERNAME INPUT */}
+        <View style={styles.inputContainer}>
+            <View style={styles.inputSubContainer}>
+                <Feather
+                    name='user'
+                    size={22}
+                    color={Colors.DEFAULT_GREY}
+                    style={{ marginRight: 10 }}
                 />
-                <Text style={styles.headerTitle}>Sign In</Text>
+                <TextInput
+                    placeholder='Username'
+                    placeholderTextColor={Colors.DEFAULT_GREY}
+                    selectionColor={Colors.DEFAULT_GREY}
+                    style={styles.inputText}
+                    onChangeText={(text) => {
+                        setUsername(text);
+                        setErrorMessage('');
+                    }}
+                    value={username}
+                />
             </View>
-            <Text style={styles.title}>Welcome</Text>
-            <Text style={styles.content}>
-                Enter your username and password, and enjoy ordering food
-            </Text>
-            <View style={styles.inputContainer}>
-                <View style={styles.inputSubContainer}>
-                    <Feather
-                        name='user'
-                        size={22}
-                        color={Colors.DEFAULT_GREY}
-                        style={{ marginRight: 10 }}
-                    />
-                    <TextInput
-                        placeholder='Username'
-                        placeholderTextColor={Colors.DEFAULT_GREY}
-                        selectionColor={Colors.DEFAULT_GREY}
-                        style={styles.inputText}
-                        onChangeText={(text) => setUsername(text)}
-                    />
-                </View>
+        </View>
+        <Separator height={15} />
+        
+        {/* PASSWORD INPUT */}
+        <View style={styles.inputContainer}>
+            <View style={styles.inputSubContainer}>
+                <Feather
+                    name='lock'
+                    size={22}
+                    color={Colors.DEFAULT_GREY}
+                    style={{ marginRight: 10 }}
+                />
+                <TextInput
+                    secureTextEntry={isPasswordShow ? false : true}
+                    placeholder='Password'
+                    placeholderTextColor={Colors.DEFAULT_GREY}
+                    selectionColor={Colors.DEFAULT_GREY}
+                    style={styles.inputText}
+                    onChangeText={(text) => {
+                        setPassword(text);
+                        setErrorMessage('');
+                    }}
+                    value={password}
+                />
+                <Feather
+                    name={isPasswordShow ? 'eye-off' : 'eye'}
+                    size={22}
+                    color={Colors.DEFAULT_GREY}
+                    style={{ marginRight: 10 }}
+                    onPress={() => setIsPasswordShow(!isPasswordShow)}
+                />
             </View>
+        </View>
+
+        {/* ERROR MESSAGE */}
+        {errorMessage ? (
+            <Text style={styles.errorMessage}>{errorMessage}</Text>
+        ) : (
             <Separator height={15} />
-            <View style={styles.inputContainer}>
-                <View style={styles.inputSubContainer}>
-                    <Feather
-                        name='lock'
-                        size={22}
-                        color={Colors.DEFAULT_GREY}
-                        style={{ marginRight: 10 }}
-                    />
-                    <TextInput
-                        secureTextEntry={isPasswordShow ? false : true}
-                        placeholder='Password'
-                        placeholderTextColor={Colors.DEFAULT_GREY}
-                        selectionColor={Colors.DEFAULT_GREY}
-                        style={styles.inputText}
-                        onChangeText={(text) => setPassword(text)}
-                    />
-                    <Feather
-                        name={isPasswordShow ? 'eye-off' : 'eye'}
-                        size={22}
-                        color={Colors.DEFAULT_GREY}
-                        style={{ marginRight: 10 }}
-                        onPress={() => setIsPasswordShow(!isPasswordShow)}
-                    />
-                </View>
+        )}
+
+        <View style={styles.forgotPasswordContainer}>
+            <View style={styles.toggleContainer}>
+                <ToggleButton size={0.5} />
+                <Text style={styles.rememberMeText}>Remember me</Text>
             </View>
-            <Text></Text>
-            <View style={styles.forgotPasswordContainer}>
-                <View style={styles.toggleContainer}>
-                    <ToggleButton size={0.5} />
-                    <Text style={styles.rememberMeText}>Remember me</Text>
-                </View>
-                <Text
-                    style={styles.forgotPasswordText}
-                    onPress={() => navigation.navigate('ForgotPassword')}
-                >
-                    Forgot Password
-                </Text>
-            </View>
-            <TouchableOpacity
-                style={[styles.signinButton, isLoading && { opacity: 0.7 }]}
-                onPress={() => handleLogin()}
-                disabled={isLoading}
+            <Text
+                style={styles.forgotPasswordText}
+                onPress={() => navigation.navigate('ForgotPassword')}
             >
-                {isLoading ? (
-                    <LottieView
-                        source={Images.LOADING}
-                        autoPlay
-                        loop
-                        style={{ width: 50, height: 50 }}
-                    />
-                ) : (
-                    <Text style={styles.signinButtonText}>Sign In</Text>
-                )}
-            </TouchableOpacity>
+                Forgot Password
+            </Text>
+        </View>
+        
+        <TouchableOpacity
+            style={[styles.signinButton, isLoading && { opacity: 0.7 }]}
+            onPress={() => handleLogin()}
+            disabled={isLoading}
+        >
+            {isLoading ? (
+                <LottieView
+                    source={Images.LOADING}
+                    autoPlay
+                    loop
+                    style={{ width: 50, height: 50 }}
+                />
+            ) : (
+                <Text style={styles.signinButtonText}>Sign In</Text>
+            )}
+        </TouchableOpacity>
             <View style={styles.signupContainer}>
                 <Text style={styles.accountText}>Don't have an account?</Text>
                 <Text
