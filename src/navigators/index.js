@@ -12,7 +12,8 @@ import {
     FoodScreen,
     CheckoutScreen,
     AddressListScreen,
-    OrderHistoryScreen
+    OrderHistoryScreen,
+    RecommendationScreen
 } from '../screens';
 import { useSelector, useDispatch } from 'react-redux';
 import { useEffect, useState } from 'react';
@@ -174,6 +175,11 @@ const Navigators = () => {
                         <Stack.Screen
                             name='OrderHistory'
                             component={OrderHistoryScreen}
+                            options={{ headerShown: false }}
+                        />
+                        <Stack.Screen
+                            name='Recommendation'
+                            component={RecommendationScreen}
                             options={{ headerShown: false }}
                         />
                     </>

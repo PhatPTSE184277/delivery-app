@@ -66,15 +66,60 @@ const SignInScreen = ({ navigation }) => {
                         {
                             text: 'Cancel',
                             style: 'cancel'
-                        },
-                        {
+                        },                        {
                             text: 'Verify Email',
-                            onPress: () => {
-                                // Tìm user bằng username để lấy email
-                                navigation.navigate('Verification', { 
-                                    email: username, // Giả sử username có thể là email
-                                    username: username 
-                                });
+                            onPress: async () => {                                try {
+                                    console.log('Looking up user:', username);
+                                    // Tìm user để lấy email
+                                    const userResponse = await axiosClient.get(`user/lookup/${username}`);
+                                    console.log('User lookup response:', userResponse);
+                                    
+                                    const userEmail = userResponse.data?.email;
+                                    const userUsername = userResponse.data?.username || username;
+                                    
+                                    if (userEmail) {
+                                        console.log('Navigating to verification with email:', userEmail);
+                                        navigation.navigate('Verification', { 
+                                            email: userEmail,
+                                            username: userUsername 
+                                        });
+                                    } else {
+                                        Alert.alert('Error', 'Could not find email for this user');
+                                    }                                } catch (err) {
+                                    console.log('User lookup error:', err);
+                                    // Nếu không tìm được user, try với register API để lấy thông tin
+                                    Alert.alert(
+                                        'User Lookup Failed', 
+                                        'Could not find user information. Please enter your email address to verify.',
+                                        [
+                                            {
+                                                text: 'Cancel',
+                                                style: 'cancel'
+                                            },
+                                            {
+                                                text: 'Enter Email',
+                                                onPress: () => {
+                                                    // Navigate với prompt user nhập email
+                                                    Alert.prompt(
+                                                        'Enter Email',
+                                                        'Please enter the email address for this account:',
+                                                        (email) => {
+                                                            if (email && email.includes('@')) {
+                                                                navigation.navigate('Verification', { 
+                                                                    email: email,
+                                                                    username: username 
+                                                                });
+                                                            } else {
+                                                                Alert.alert('Error', 'Please enter a valid email address');
+                                                            }
+                                                        },
+                                                        'plain-text'
+                                                    );
+                                                }
+                                            }
+                                        ]
+                                    );
+                                }
                             }
                         }
                     ]

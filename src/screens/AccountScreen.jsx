@@ -161,27 +161,6 @@ const AccountScreen = ({ navigation }) => {
                     />
                 </TouchableOpacity>
 
-                {/* Fix: Add Bookmarks navigation */}
-                <TouchableOpacity
-                    style={styles.sectionContainer}
-                    activeOpacity={0.8}
-                    onPress={() => navigation.navigate('Bookmark')}
-                >
-                    <View style={styles.sectionTextContainer}>
-                        <Ionicons
-                            name='bookmark-outline'
-                            size={18}
-                            color={Colors.DEFAULT_GREEN}
-                        />
-                        <Text style={styles.sectionText}>My Bookmarks</Text>
-                    </View>
-                    <Feather
-                        name='chevron-right'
-                        color={Colors.INACTIVE_GREY}
-                        size={20}
-                    />
-                </TouchableOpacity>
-
                 <Text style={styles.sectionHeaderText}>Notification</Text>
                 <View style={styles.sectionContainer} activeOpacity={0.8}>
                     <View style={styles.sectionTextContainer}>

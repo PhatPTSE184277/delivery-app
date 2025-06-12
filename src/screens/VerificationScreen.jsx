@@ -105,9 +105,7 @@ const VerificationScreen = ({
         } finally {
             setIsLoading(false);
         }
-    };
-
-    const handleResendOTP = async () => {
+    };    const handleResendOTP = async () => {
         if (!canResend) {
             Alert.alert(
                 'Please wait',
@@ -121,13 +119,13 @@ const VerificationScreen = ({
                 email: email
             });
 
-            console.log('Resend OTP response:', response.data);
+            console.log('Resend OTP response:', response); // DEBUG
 
-            if (response && response.data && response.data.success) {
+            // Vì axiosClient interceptor return res.data, response chính là data
+            if (response && response.success) {
                 Alert.alert(
                     'Success',
-                    response.data.message ||
-                        'New OTP has been sent to your email'
+                    response.message || 'New OTP has been sent to your email'
                 );
 
                 setCountdown(60);
@@ -137,14 +135,14 @@ const VerificationScreen = ({
             } else {
                 Alert.alert(
                     'Error',
-                    response.data?.message || 'Failed to resend OTP'
+                    response?.message || 'Failed to resend OTP'
                 );
             }
         } catch (error) {
             console.log('Resend OTP error:', error);
             Alert.alert(
                 'Error',
-                error?.response?.data?.message || 'Failed to resend OTP'
+                error?.message || 'Failed to resend OTP'
             );
         } finally {
             setIsLoading(false);

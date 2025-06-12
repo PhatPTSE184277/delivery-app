@@ -21,15 +21,7 @@ import {
     Separator,
     SkeletonFoodCard
 } from '../components';
-import { useDispatch, useSelector } from 'react-redux';
 import { TouchableOpacity } from 'react-native';
-import {
-    addBookmark,
-    removeBookmark,
-    addBookmarkAsync,
-    removeBookmarkAsync,
-    isBookmarkedSelector
-} from '../reduxs/reducers/bookmarkReducer';
 
 const ListHeader = () => (
     <View
@@ -80,47 +72,7 @@ const RestaurantScreen = ({
     const [loading, setLoading] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState();
     const [refreshing, setRefreshing] = useState(false);
-    const dispatch = useDispatch();
 
-    const isBookmarked = useSelector((state) =>
-        isBookmarkedSelector(state, restaurantId)
-    );
-
-    const currentUser = useSelector((state) => state.authReducer.data);
-
-    const handleBookmarkToggle = () => {
-        if (!currentUser?._id) {
-            console.log('User not logged in');
-            return;
-        }
-
-        if (isBookmarked) {
-            dispatch(removeBookmark({ id: restaurantId }));
-            dispatch(
-                removeBookmarkAsync({
-                    restaurantId,
-                    userId: currentUser._id
-                })
-            );
-        } else {
-            const bookmarkData = {
-                id: restaurantId,
-                name: restaurant?.name,
-                image: restaurant?.images?.cover,
-                description: restaurant?.description || '',
-                rating: restaurant?.rating || 4.2,
-                address: restaurant?.location
-            };
-
-            dispatch(addBookmark(bookmarkData));
-            dispatch(
-                addBookmarkAsync({
-                    restaurantId,
-                    userId: currentUser._id
-                })
-            );
-        }
-    };
     const getRestaurant = async () => {
         setLoading(true);
         try {
@@ -195,21 +147,6 @@ const RestaurantScreen = ({
                     <View style={styles.mainContainer}>
                         <View style={styles.titleContainer}>
                             <Text style={styles.title}>{restaurant?.name}</Text>
-                            <TouchableOpacity onPress={handleBookmarkToggle}>
-                                <Ionicons
-                                    name={
-                                        isBookmarked
-                                            ? 'bookmark'
-                                            : 'bookmark-outline'
-                                    }
-                                    color={
-                                        isBookmarked
-                                            ? Colors.DEFAULT_YELLOW
-                                            : Colors.DEFAULT_GREY
-                                    }
-                                    size={24}
-                                />
-                            </TouchableOpacity>
                         </View>
                         <Text style={styles.tagText}>
                             {restaurant?.tags?.length > 4

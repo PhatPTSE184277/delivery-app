@@ -142,6 +142,32 @@ const HomeScreen = ({ navigation }) => {
                     />
                 }
             >
+                <TouchableOpacity
+                    style={styles.aiRecommendationContainer}
+                    onPress={() => navigation.navigate('Recommendation')}
+                    activeOpacity={0.8}
+                >
+                    <View style={styles.aiRecommendationLeft}>
+                        <Ionicons
+                            name='hardware-chip-outline'
+                            size={24}
+                            color={Colors.DEFAULT_WHITE}
+                        />
+                        <View style={styles.aiTextContainer}>
+                            <Text style={styles.aiRecommendationTitle}>
+                                🤖 AI Recommendations
+                            </Text>
+                            <Text style={styles.aiRecommendationSubtitle}>
+                                Powered by Google Gemini
+                            </Text>
+                        </View>
+                    </View>
+                    <Ionicons
+                        name='chevron-forward-outline'
+                        size={20}
+                        color={Colors.DEFAULT_WHITE}
+                    />
+                </TouchableOpacity>
                 <View style={styles.horizontalListContainer}>
                     <View style={styles.listHeader}>
                         <Text style={styles.listHeaderTitle}>Top Rated</Text>
@@ -377,5 +403,44 @@ const styles = StyleSheet.create({
         fontSize: 13,
         lineHeight: 13 * 1.4,
         fontFamily: Fonts.POPPINS_SEMI_BOLD
-    }
+    },
+     aiRecommendationContainer: {
+        backgroundColor: Colors.DEFAULT_GREEN,
+        marginHorizontal: 20,
+        marginTop: 20, // ✅ Margin từ top ScrollView
+        marginBottom: 10, // ✅ Space trước "Top Rated"
+        borderRadius: 12,
+        padding: 16,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        elevation: 4,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 6,
+    },
+    aiRecommendationLeft: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        flex: 1,
+    },
+    aiTextContainer: {
+        marginLeft: 12,
+        flex: 1,
+    },
+    aiRecommendationTitle: {
+        color: Colors.DEFAULT_WHITE,
+        fontSize: 16,
+        fontFamily: Fonts.POPPINS_SEMI_BOLD,
+        lineHeight: 16 * 1.4,
+        marginBottom: 2,
+    },
+    aiRecommendationSubtitle: {
+        color: Colors.DEFAULT_WHITE,
+        fontSize: 12,
+        fontFamily: Fonts.POPPINS_REGULAR,
+        opacity: 0.8,
+        lineHeight: 12 * 1.4,
+    },
 });

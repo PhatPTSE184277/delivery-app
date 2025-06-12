@@ -9,12 +9,12 @@ import HomeScreen from './HomeScreen';
 import RestaurantScreen from './RestaurantScreen';
 import CartScreen from './CartScreen';
 import FoodScreen from './FoodScreen';
-import BookmarkScreen from './BookmarkScreen';
 import AccountScreen from './AccountScreen';
 import CheckoutScreen from './CheckoutScreen';
 import MapScreen from './MapScreen';
 import AddressListScreen from './AddressListScreen';
 import OrderHistoryScreen from './OrderHistoryScreen';
+import RecommendationScreen from './RecommendationScreen';
 
 export {
     SplashScreen,
@@ -28,10 +28,10 @@ export {
     RestaurantScreen,
     CartScreen,
     FoodScreen,
-    BookmarkScreen,
     AccountScreen,
     CheckoutScreen,
     MapScreen,
     AddressListScreen,
-    OrderHistoryScreen
+    OrderHistoryScreen,
+    RecommendationScreen
 };

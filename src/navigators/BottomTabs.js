@@ -1,5 +1,5 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { AccountScreen, BookmarkScreen, CartScreen, HomeScreen, MapScreen } from '../screens';
+import { AccountScreen, CartScreen, HomeScreen, MapScreen } from '../screens';
 import React from 'react';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Colors } from '../contants';
@@ -40,15 +40,6 @@ export default () => {
                 options={{
                     tabBarIcon: ({ color }) => (
                         <Ionicons name='compass-outline' size={23} color={color} />
-                    )
-                }}
-            />
-             <BottomTabs.Screen
-                name='Bookmark'
-                component={BookmarkScreen}
-                options={{
-                    tabBarIcon: ({ color }) => (
-                        <Ionicons name='bookmark-outline' size={23} color={color} />
                     )
                 }}
             />

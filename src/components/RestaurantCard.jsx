@@ -1,18 +1,7 @@
-import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Colors, Fonts } from '../contants';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import { StaticImageService } from '../services';
-import { useDispatch, useSelector } from 'react-redux';
-import {
-    addBookmark,
-    removeBookmark,
-    addBookmarkAsync,
-    removeBookmarkAsync,
-    isBookmarkedSelector
-} from '../reduxs/reducers/bookmarkReducer';
-
 const RestaurantCard = ({
     id,
     name,
@@ -20,47 +9,6 @@ const RestaurantCard = ({
     location,
     navigate
 }) => {
-    const dispatch = useDispatch();
-
-    const isBookmarked = useSelector((state) =>
-        isBookmarkedSelector(state, id)
-    );
-
-    const currentUser = useSelector((state) => state.authReducer.data);
-
-    const handleBookmarkToggle = () => {
-        if (!currentUser?._id) {
-            console.log('User not logged in');
-            return;
-        }
-
-        if (isBookmarked) {
-            dispatch(removeBookmark({ id }));
-            dispatch(
-                removeBookmarkAsync({
-                    restaurantId: id,
-                    userId: currentUser._id
-                })
-            );
-        } else {
-            const bookmarkData = {
-                id: id,
-                name,
-                image: poster,
-                description: '',
-                rating: 4.0,
-                address: ''
-            };
-
-            dispatch(addBookmark(bookmarkData));
-            dispatch(
-                addBookmarkAsync({
-                    restaurantId: id,
-                    userId: currentUser._id
-                })
-            );
-        }
-    };
 
     return (
         <TouchableOpacity
@@ -68,20 +16,6 @@ const RestaurantCard = ({
             activeOpacity={0.8}
             onPress={() => navigate(id)}
         >
-            <TouchableOpacity
-                onPress={handleBookmarkToggle}
-                style={styles.bookmark}
-            >
-                <Ionicons
-                    name={isBookmarked ? 'bookmark' : 'bookmark-outline'}
-                    color={
-                        isBookmarked
-                            ? Colors.DEFAULT_YELLOW
-                            : Colors.DEFAULT_GREY
-                    }
-                    size={24}
-                />
-            </TouchableOpacity>
             <Image
                 source={{ uri: StaticImageService.getPoster(poster) }}
                 style={styles.posterStyle}
@@ -161,12 +95,6 @@ const styles = StyleSheet.create({
         lineHeight: 10 * 1.4,
         fontFamily: Fonts.POPPINS_BOLD,
         color: Colors.DEFAULT_BLACK
-    },
-    bookmark: {
-        position: 'absolute',
-        top: 10,
-        right: 10,
-        zIndex: 10
     }
 });
 
